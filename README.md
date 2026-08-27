@@ -196,6 +196,9 @@ Overall, the validation demonstrates that the reconstructed GOES-18 SST product 
 <img width="1790" height="1547" alt="image" src="https://github.com/user-attachments/assets/c3298189-6595-4073-a82c-91e71cd04e72" />
 <img width="1781" height="1421" alt="image" src="https://github.com/user-attachments/assets/c04df0a9-817e-4911-b2b7-87ff5cf50dd0" />
 
+(This image can go to Appendix)
+<img width="1411" height="1423" alt="image" src="https://github.com/user-attachments/assets/c40c9850-975f-4791-9e99-11e60752d365" />
+
 
 ## 3.2 Spatial gradient in LALA exposure and storm-relative reef cooling
 
