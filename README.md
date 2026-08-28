@@ -73,8 +73,6 @@ The reconstruction preserved all originally observed SST values and filled only 
 Maintaining separate DAY and NIGHT reconstructions was particularly important for the interpretation of storm-induced cooling. Nighttime SST is less affected by daytime shortwave heating and the formation of a shallow near-surface warm layer, and therefore provides a useful indicator of the underlying storm-related cooling response. DAY SST was retained as a complementary measure to characterize the full diurnal thermal response.
 
 
-
-
 ## 2.3 Coral-reef analysis units
 
 Coral-reef polygons were obtained from the `WCMC008_CoralReefs_2018_v4` dataset and manually reorganized in ArcGIS to define reef-scale analysis units that better represented individual island reef systems.
@@ -85,94 +83,130 @@ Following this manual regrouping procedure, a total of 22 reef analysis units we
 
 A 1-km buffer was generated around each reef geometry to define the surrounding SST sampling region. For each reconstructed DAY and NIGHT SST composite, all valid raster cells intersecting the reef buffer were identified, and their median SST was calculated as the representative temperature of that reef unit. Additional statistics, including the mean, 25th and 75th percentiles, number of valid pixels, and spatial coverage, were calculated for quality assessment. The median SST was retained as the primary reef-scale statistic because it is less sensitive to isolated anomalous pixels or localized reconstruction artifacts than the mean.
 
-<img width="1790" height="989" alt="image" src="https://github.com/user-attachments/assets/67eb901b-d382-46f1-98be-8cb496db7431" />
+<img width="1448" height="784" alt="Screenshot 2026-08-28 at 11 13 09 AM" src="https://github.com/user-attachments/assets/88bb7865-e385-4d3a-bc65-bf8299a2e7dc" />
 
 
-## 2.4 LALA best-track processing and closest-passage calculation
+## 2.4 In situ temperature validation
 
-The preliminary best-track data for LALA were obtained from the National Hurricane Center (NHC) and converted to a point shapefile. The storm positions were ordered chronologically and connected to form a continuous representation of the LALA trajectory.
+The reconstructed GOES-18 SST fields were evaluated against independent in situ water-temperature observations from National Data Buoy Center (NDBC) stations located within and adjacent to the study region. Water temperature (`WTMP`) was used as the in situ reference variable. Because GOES-18 SST represents the ocean skin temperature whereas NDBC observations measure bulk water temperature at the station or platform, the comparison was interpreted as an evaluation of consistency between the reconstructed satellite SST field and independently observed near-surface water temperature rather than as an exact measurement-equivalence test.
 
-For each of the 22 manually defined coral-reef analysis units, the shortest distance between the complete reef geometry and the continuous LALA track was calculated. Distance calculations were performed in a local azimuthal equidistant projection centered on each reef unit so that distances could be evaluated in metric units while minimizing projection distortion.
+The NDBC observations were processed using the same DAY and NIGHT temporal framework applied to the GOES-18 composites. Observation times were converted from UTC to Hawaii Standard Time (HST; UTC−10 h) and assigned to either the DAY period (06:00–18:00 HST) or NIGHT period (18:00–06:00 HST). Observations collected between 18:00 and 24:00 HST were assigned to the following NIGHT composite, while observations collected between 00:00 and 06:00 HST were assigned to the NIGHT composite of the same local date. For each station and DAY/NIGHT period, the median in situ water temperature was calculated to provide a temporally consistent comparison with the corresponding 12-h satellite composite.
 
-Rather than calculating distance only to the discrete NHC best-track positions, the minimum distance was evaluated against each line segment connecting consecutive storm positions. This allowed the point of closest approach to occur anywhere along the continuous storm trajectory rather than being constrained to an individual reported best-track location.
+Reconstructed SST was extracted at each NDBC station coordinate from the corresponding DAY or NIGHT DINEOF raster. The raster cell containing the station location was sampled first. If that pixel did not contain a valid reconstructed SST value, the median of valid SST pixels within a $3 \times 3$ neighborhood centered on the station was used. Station–composite pairs were retained only when both a valid in situ median temperature and a valid reconstructed SST estimate were available.
 
-For the track segment associated with the minimum reef-to-track distance, the relative position of the closest point along that segment was used to interpolate the time of closest LALA passage. Each reef analysis unit was therefore assigned both a minimum distance to the storm track and a reef-specific closest-passage time. These values were subsequently used to construct the storm-relative temporal framework for the SST anomaly analysis.
-
-
-## 2.5 Storm-relative temporal framework
-
-Because LALA passed individual reef groups at different times, SST observations were analyzed relative to the reef-specific time of closest passage.
-
-For each SST observation, storm-relative time was calculated as
+Validation performance was quantified using the coefficient of determination ($R^2$), root-mean-square error (RMSE), and mean bias. Bias was defined as
 
 $$
-t_{\mathrm{relative}} = t_{\mathrm{SST}} - t_{\mathrm{closest}},
+\text{Bias} = T_{\text{DINEOF}} - T_{\text{NDBC}}
 $$
 
-where $$t_{\mathrm{closest}}\$$ is the interpolated time of closest LALA passage for the corresponding reef group.
+such that positive values indicate reconstructed SST warmer than the corresponding NDBC observation and negative values indicate reconstructed SST cooler than the in situ observation. Statistics were calculated separately for DAY and NIGHT observations and for all matched observations combined.
 
-Thus,
-
-$$
-t_{\mathrm{relative}} = 0
-$$
-
-represents the time of closest storm passage for each reef group independently. Negative values represent observations before closest passage, whereas positive values represent observations after passage.
-
-This storm-relative framework allows thermal responses from spatially separated reefs to be compared using a common temporal reference despite differences in the calendar date of storm exposure.
-
----
-
-## 2.6 Reef-specific SST anomaly
-
-To account for spatial differences in background SST among reef groups, anomalies were calculated relative to a reef-specific and period-specific baseline.
-
-The baseline interval was defined as
+To reduce the influence of isolated anomalous matchups, outliers were identified from the residuals between reconstructed and in situ temperatures. Outlier detection was performed independently for each station and for DAY and NIGHT observations using a median absolute deviation (MAD)-based modified z-score:
 
 $$
--120 \leq t_{\mathrm{relative}} \leq -48 \mathrm{h}.
+z^{*} = 0.6745 \frac{r_i - \tilde{r}}{\text{MAD}}
 $$
 
-```
--120 h ---------------- -48 h          0 h
-   |                      |             |
-   └──── baseline ─────────┘       closest passage
+where $r_i$ is the DINEOF–NDBC temperature residual and $\tilde{r}$ is the median residual for the corresponding station and observation period. Matchups with $|z^{*}| > 3.5$ were classified as outliers and excluded from the reported validation statistics, while remaining visible in the time-series diagnostics for quality assessment.
 
-   5 days before          2 days before
-```
+Each matchup was additionally classified according to whether valid satellite SST was present before DINEOF reconstruction. A matchup was classified as **original-existing** when valid SST was already available in the original unfilled GOES-18 composite at the sampled location. A matchup was classified as **DINEOF-filled** when one or more pixels contributing to the station SST estimate were missing in the original composite and subsequently reconstructed by DINEOF. This distinction was used to assess whether reconstructed SST values remained consistent with the independent in situ observations.
 
-DAY and NIGHT baselines were calculated separately. For each reef group and period, the baseline SST was defined as the median SST during this interval.
-
-The SST anomaly was then calculated as
+Missing-data conditions were also characterized at both local and scene scales. For each NDBC matchup, a local missing-SST rate was calculated from the original unfilled GOES-18 composite using a station-centered $5 \times 5$ pixel window:
 
 $$
-SST' = SST - SST_{\mathrm{baseline}}.
+M_{\text{local}} = 100 \frac{N_{\text{missing}}}{N_{\text{window}}}
 $$
 
-Negative anomalies therefore indicate cooling relative to the pre-passage thermal state of the same reef group.
+where $N_{\text{missing}}$ is the number of pixels without valid SST within the local window and $N_{\text{window}}$ is the total number of pixels evaluated.
 
-This normalization allows reef groups with different absolute SST regimes to be compared directly.
+A scene-scale missing rate was calculated independently for each DAY and NIGHT composite from the proportion of the final valid DINEOF domain that did not contain valid SST before reconstruction. This quantity was expressed as
 
----
+$$
+M_{\text{scene}} = 100 - P_{\text{original}}
+$$
+
+where $P_{\text{original}}$ is the percentage of final DINEOF-valid pixels that already contained valid SST in the original composite. Under this definition, the scene missing rate is equivalent to the fraction of the final valid SST field supplied by DINEOF reconstruction. The local and scene-scale metrics were used as diagnostic indicators of satellite data availability and to examine whether validation errors increased under more spatially extensive missing-data conditions.
 
 
-## 2.7 Distance-based storm exposure
 
-The shortest distance between each reef group and the continuous LALA track was retained as the primary geometric measure of storm exposure.
+## 2.5 LALA track processing and storm-relative reef exposure
 
-For visualization, reef groups were classified into four distance categories:
+Preliminary best-track data for LALA were obtained from the National Hurricane Center (NHC) and converted to a geospatial point dataset. Storm positions were ordered chronologically and connected sequentially to construct a continuous representation of the LALA trajectory across the study region.
 
-| Distance class | Definition |
+For each of the 22 reef analysis units, the minimum distance between the complete reef geometry and the continuous LALA track was calculated. To obtain distances in metric units while minimizing projection distortion, each reef unit and the surrounding storm-track segments were transformed to a local azimuthal equidistant projection centered on the corresponding reef geometry.
+
+Rather than calculating reef-to-storm distance only from the discrete NHC best-track positions, the minimum distance was evaluated against each line segment connecting consecutive storm locations. This allowed the closest point of approach to occur anywhere along the continuous storm trajectory and avoided constraining the distance estimate to an individual reported best-track position.
+
+For the track segment associated with the minimum reef-to-track distance, the fractional position of the closest point along the segment was determined. The corresponding closest-passage time was then linearly interpolated between the timestamps of the two neighboring NHC track positions. Each reef analysis unit was therefore assigned both a minimum distance to the continuous LALA track and a reef-specific time of closest passage.
+
+Because LALA reached different reef systems at different times, all subsequent SST observations were expressed relative to the closest-passage time of the corresponding reef. Storm-relative time was calculated as
+
+$$
+t_{\text{relative}} = t_{\text{SST}} - t_{\text{closest}}
+$$
+
+where $t_{\text{SST}}$ is the representative time of the corresponding DAY or NIGHT SST composite and $t_{\text{closest}}$ is the interpolated time of closest LALA passage for that reef analysis unit.
+
+Under this convention, $t_{\text{relative}} = 0$ represents the time of closest passage for each reef independently. Negative storm-relative times indicate observations before closest passage, whereas positive values indicate observations after passage. This transformation places spatially separated reef systems within a common storm-relative temporal framework and allows their thermal responses to be compared despite differences in the calendar date and time of storm exposure.
+
+The minimum reef-to-track distance was retained as the primary geometric measure of storm exposure. For visualization and interpretation, reef analysis units were additionally grouped into four distance classes:
+
+| Distance class | Minimum distance to LALA track |
 |---|---:|
-| Near | ≤100 km |
-| Intermediate | >100–200 km |
-| Distant | >200–400 km |
-| Far control | >400 km |
+| Near | $\le 100\text{ km}$ |
+| Intermediate | $> 100\text{ to } 200\text{ km}$ |
+| Distant | $> 200\text{ to } 400\text{ km}$ |
+| Far control | $> 400\text{ km}$ |
 
-These categories were used primarily for grouped time-series visualization. Statistical relationships between storm exposure and SST response were evaluated using continuous track distance rather than categorical distance classes.
+These categories were used primarily for grouped time-series visualization and comparison of the storm-relative SST response. Statistical relationships between storm exposure and reef cooling were evaluated using the continuous minimum track distance rather than the categorical classes.
 
----
 
+## 2.6 Reef-specific SST anomalies and thermal-response metrics
+
+Absolute SST varied among reef systems because of geographic location, background oceanographic conditions, and differences between DAY and NIGHT observations. To isolate temperature changes associated with LALA from these background differences, SST anomalies were calculated relative to a reef-specific and period-specific pre-storm baseline.
+
+For each reef analysis unit, the baseline period was defined as
+
+$$
+-120 \le t_{\text{relative}} \le -48\text{ h}
+$$
+
+corresponding to approximately five to two days before the time of closest LALA passage. DAY and NIGHT observations were treated independently so that normal diurnal differences in SST did not influence the estimated storm response.
+
+For each reef and observation period, the baseline SST was defined as the median temperature within this pre-passage interval:
+
+$$
+SST_{\text{baseline}} = \text{median}\left(SST_{-120 \le t_{\text{relative}} \le -48}\right)
+$$
+
+The reef-specific SST anomaly was then calculated as
+
+$$
+SST' = SST - SST_{\text{baseline}}
+$$
+
+Negative values of $SST'$ therefore indicate cooling relative to the pre-LALA thermal state of the same reef and DAY/NIGHT period, whereas positive values indicate warming relative to the baseline. This normalization removes differences in absolute background temperature among reef systems and allows their thermal responses to be compared directly.
+
+The post-passage thermal response was evaluated primarily during the first 72 h following closest passage. Three complementary metrics were calculated for each reef analysis unit and separately for DAY and NIGHT observations. First, the minimum SST anomaly between 0 and 72 h was used to represent the maximum post-passage cooling:
+
+$$
+SST'_{\text{min},0\text{--}72} = \min\left(SST'_{0 \le t_{\text{relative}} \le 72}\right)
+$$
+
+Second, the median anomaly during the same 0–72 h interval was used as the primary measure of the sustained post-storm thermal response:
+
+$$
+SST'_{\text{med},0\text{--}72} = \text{median}\left(SST'_{0 \le t_{\text{relative}} \le 72}\right)
+$$
+
+Finally, because the strongest cooling response did not necessarily occur at the instant of closest passage, the median anomaly between 24 and 72 h was calculated to characterize the delayed component of the thermal response:
+
+$$
+SST'_{\text{med},24\text{--}72} = \text{median}\left(SST'_{24 \le t_{\text{relative}} \le 72}\right)
+$$
+
+These response metrics were subsequently compared with minimum reef-to-track distance to evaluate whether the magnitude and persistence of cooling varied systematically with storm proximity. DAY and NIGHT observations were analyzed separately throughout the storm-relative analysis to preserve differences in diurnal surface heating and to determine whether the LALA-associated cooling signal was consistently expressed across both observation periods.
 
 # 3. Results
 
