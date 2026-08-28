@@ -73,6 +73,8 @@ The reconstruction preserved all originally observed SST values and filled only 
 Maintaining separate DAY and NIGHT reconstructions was particularly important for the interpretation of storm-induced cooling. Nighttime SST is less affected by daytime shortwave heating and the formation of a shallow near-surface warm layer, and therefore provides a useful indicator of the underlying storm-related cooling response. DAY SST was retained as a complementary measure to characterize the full diurnal thermal response.
 
 
+
+
 ## 2.3 Coral-reef analysis units
 
 Coral-reef polygons were obtained from the `WCMC008_CoralReefs_2018_v4` dataset and manually reorganized in ArcGIS to define reef-scale analysis units that better represented individual island reef systems.
@@ -198,6 +200,7 @@ Overall, the validation demonstrates that the reconstructed GOES-18 SST product 
 
 (This image can go to Appendix)
 <img width="1411" height="1423" alt="image" src="https://github.com/user-attachments/assets/c40c9850-975f-4791-9e99-11e60752d365" />
+<img width="1486" height="733" alt="Screenshot 2026-08-28 at 11 01 58 AM" src="https://github.com/user-attachments/assets/eddd2f37-1705-416d-b8c8-e7dc5568c21f" />
 
 
 ## 3.2 Spatial gradient in LALA exposure and storm-relative reef cooling
