@@ -1,5 +1,5 @@
 
-# LALA-Induced Thermal Response Across Northwestern Hawaiian Coral Reefs
+# LALA's Cool Tail (Thermal Response) Across Northwestern Hawaiian Coral Reefs
 
 ## Preliminary analysis
 > **Status:** Preliminary / exploratory analysis  
